@@ -16,7 +16,7 @@ mdit = (
     .enable('table')
 )
 
-my_repo_url = "https://github.com/stas00/python-cookbook/blob/main"
+my_repo_url = "https://github.com/stas00/python-cookbook/blob/master"
 
 def convert_markdown_to_html(markdown_path, args):
     md_content = markdown_path.read_text()

@@ -59,8 +59,8 @@ The content of this site is distributed under [Attribution-ShareAlike 4.0 Intern
 
 ## My repositories map
 
-✔ **Free Books:**
- [ML Engineering Online Book](https://github.com/stas00/ml-engineering) |
+✔ **Books:**
+ [Machine Learning Engineering](https://github.com/stas00/ml-engineering) |
  [The Art of Debugging](https://github.com/stas00/the-art-of-debugging) |
  [Stas' Python Cookbook](https://github.com/stas00/python-cookbook)
 
