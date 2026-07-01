@@ -10,6 +10,8 @@ This book grew out of a personal cheat sheet. Every section leads with the
 that bite people in practice. It targets **Python 3.8+**, and notes version
 specifics where they matter.
 
+This is based on the python cheat sheet that I have been honing since many years and still refer to it daily. I then used Claude to convert it to more readable prose, that is hopefully more enjoyable to read. If you prefer the raw/dense cheat sheet
+ you can find it [here](python.txt).
 
 ## Table of Contents
 

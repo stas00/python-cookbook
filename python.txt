@@ -43,7 +43,6 @@ numpy.random.set_state(np_rng_state)
 
 
 
-
 #############
 ### regex ###
 #############
@@ -132,13 +131,13 @@ re.match(".*\db.*", "a1bc") # <re.Match object; span=(0, 4), match='a1bc'>
 def my_replace(match):
     match = match.group()
     return match + str(match.index('e'))
-re.sub(r'@\w+', my_replace, 'quick @red fox @lame') # 'quick @red2 fox @lame4'
+out = re.sub(r'@\w+', my_replace, 'quick @red fox @lame') # 'quick @red2 fox @lame4'
 #
 # or via lambda
 # e.g. to do a lookup, access the matched string via group() directly
 lookup = {'1': 'one', '2': 'two', '3': 'three'}
 s = "1 testing 2 3"
-re.sub(r'\d', lambda x: lookup[x.group()], s)
+out = re.sub(r'\d', lambda x: lookup[x.group()], s)
 
 # match and assign to variables (assumption - the match works) - e.g. url split
 match = re.findall(r'^(.*?//)([\w\.:]+)(.*)$', url)
@@ -158,11 +157,21 @@ y = {k:v for k,v in (re.split(r"(?=\b[=<>].+)", d, 2) for d in x) }
 # or: with findall
  { k:v for k,v in list(re.findall(r"^([^=<>]+)([=<>]{,2}.*)", d, 2)[0] for d in x) }
 
-# replace characters
+# replace characters or substrings
 s = s.replace('f', 'F')
+s = s.replace('foo', 'bar')
 
 # remove trailing and leading spaces.
 s = s.strip()
+
+# partition the string into (before, separator, after) tuple of 3 strings
+"aaabbbccc".rpartition("bbb") # ("aaa", "bbb", "ccc")
+
+# split a string into sub-strings by separator, excluding the separator
+"aaa bbb ccc".rsplit() #  ("aaa", "bbb", "ccc")
+"aaa-bbb-ccc".rsplit("-") #  ("aaa", "bbb", "ccc")
+# split only the last n occurrences, e.g. with n=1
+"aaa-bbb-ccc".rsplit("-", 1) #  ("aaa-bbb", "ccc")
 
 # remove a set of characters from the two sides only:
 'www.example.com'.strip('cmowz.') # 'example'
@@ -236,6 +245,7 @@ import shlex;
 print(shlex.split("squeue --user=$(getent group six | cut -d: -f4) -o \"%.16i %.9P %R\""))
 # ['squeue', '--user=$(getent', 'group', 'six', '|', 'cut', '-d:', '-f4)', '-o', '%.16i %.9P %R']
 
+
 ### string contains checks
 #
 # anywhere in the string
@@ -283,6 +293,15 @@ def findstem(arr):
     print(stems) # grace
 
 
+# text encoding
+
+# fix broken utf-8 encoding (doesn't always work)
+iconv -f utf-8 -t utf-8 -c bad.txt > good.txt
+
+
+# ftfy: fixes text for you
+import ftfy
+ftfy.fix_text('âœ” No problems') # '✔ No problems'
 
 
 ###########
@@ -302,6 +321,14 @@ val = os.environ.get('MYVAR', 'fallback val')
 # check if env var exists
 if 'HOME' in os.environ: ...
 
+# unset env vars by pattern
+for key in os.environ.keys():
+    if key.startswith("SLURM_"):
+        os.environ.pop(key)
+
+# dump environ
+python3 -c 'import os; [print(f"{k}={v}") for k,v in sorted(os.environ.items())]'
+
 # to pass custom env setting to a subprocess command:
 process = subprocess.Popen(['env', 'RSYNC_PASSWORD=foobar', 'rsync', 'rsync://username@foobar.com::'], stdout=subprocess.PIPE)
 # or platform-independent:
@@ -311,6 +338,11 @@ subprocess.Popen(cmd, env=my_env)
 # another way to expand PATH:
 my_env = os.environ.copy()
 my_env["PATH"] = "/usr/sbin:/sbin:" + my_env["PATH"]
+
+
+# remove env var
+os.environ.pop('MYVAR', None)
+
 
 #############
 ### hacks ###
@@ -331,7 +363,7 @@ python -c "import torch; exec('with torch.cuda.device(0):\n  x = torch.ones(1000
 # env variable PYTHONPATH
 PYTHONPATH="$PWD/code" python ...
 # dynamic solution and also include a possibly preset env var PYTHONPATH (and dump the paths)
-PYTHONPATH=`pwd`/src:$PYTHONPATH python -c 'import sys; print(sys.path)'
+PYTHONPATH=`pwd`/src:$PYTHONPATH python -c 'import sys; print("\n".join(sys.path))'
 
 # show:
 import os
@@ -407,6 +439,9 @@ list(Path(path).glob('*'))
 # recursive
 list(Path(path).rglob('*'))
 
+# list only subdirs of the directory w/ the help of the "**/" pattern
+list(Path(path).glob('**/'))
+
 # get caller's __file__
 import inspect, os
 caller__file__ = inspect.stack()[1][1]
@@ -437,6 +472,12 @@ print(p.suffix) # .txt
 from shutil import copy2
 copy2(f_in, f_out)
 copy2(file, dir)
+
+# replace/remove suffix
+from pathlib import Path
+filename = Path('/some/path/somefile.txt')
+filename_replace_ext = filename.with_suffix('.jpg')
+filename_wo_ext = filename.with_suffix('')
 
 # find where a given module was imported from
 import sys
@@ -534,6 +575,33 @@ def cmd_exists(cmd):
 # glob
 import glob
 glob.glob('./[0-9].*') # ['./1.gif', './2.txt']
+
+
+# test if a given path is on a local fs or not (might required adding more local fs types to `local_fs_types`)
+from psutil import disk_partitions
+from pathlib import Path
+fs_types = {Path(r.mountpoint):r.fstype for r in disk_partitions(all=True)}
+local_fs_types = ["ext", "ext2", "ext3", "ext4", "reiserfs", "jfs", "xfs", "zfs", "xfs", "btrfs", "ntfs", "overlay"]
+def is_local_fs(path):
+    """ returns True if the path resides on the local fs or not """
+    return True if path_to_fs_type(path) in local_fs_types else False
+
+def path_to_fs_type(path):
+    """
+    Given a fs `path` returns the fs type (ext, ext2, etc.) it resides on.
+    Note that in this implementation non-existing paths will return the fs type of `/` (which often will be mapped to "overlay")
+    This is useful since as long as partitions are mounted already you can detect the type of the fs ven before the sub-dirs were created
+    """
+    path = Path(path).resolve()
+    if path.is_symlink():
+        path = path.readlink() # py3.9+
+
+    # assuming at the end we percolate to `/` which is always there so the exit condition is assured
+    if path in fs_types:
+        return fs_types[path]
+
+    return path_to_fs_type(path.parent)
+
 
 
 ### tmp file/dir creation ###
@@ -701,11 +769,42 @@ def main():
     do_something()
 
 
+#################
+### resources ###
+#################
+
+
+# if needed to do a recursion of more than 1k deep and getting:
+
+RecursionError: maximum recursion depth exceeded in comparison
+
+# increase the resources like so:
+
+import resource
+import sys
+
+# by default the recursion stack is 1k
+print(resource.getrlimit(resource.RLIMIT_STACK)) # ( 8388608, -1)
+print(sys.getrecursionlimit())                   # 1000
+
+# set recursion stack and python interpreter stack 8x bigger
+resource.setrlimit(resource.RLIMIT_STACK, [0x4000000, resource.RLIM_INFINITY]) # (67108864, -1)
+sys.setrecursionlimit(0x20000)                                                 # 8192
+
+# chheck
+python -c 'import resource, sys; print(sys.getrecursionlimit(), resource.getrlimit(resource.RLIMIT_STACK))';
+1000 ( 8388608, -1)
+
 
 
 #############
 ### print ###
 #############
+
+# undo/reverse espacing done by repr
+s = "ab\naa\ndd"
+x = bytes(s, "utf-8").decode("unicode_escape")
+print(x) # prints multiline
 
 # multiple independent processes (not launched from python parent process)
 import fcntl
@@ -841,7 +940,13 @@ parser.add_argument('input', help='csv input file')
 parser.add_argument('output', nargs='?', help='kml output file (optional)')
 # multiple arguments
 parser.add_argument('--ids', type=int, nargs='+')
-
+# choices
+parser.add_argument('--list',
+                    default='all',
+                    const='all',
+                    nargs='?',
+                    choices=['a', 'b', 'all'],
+                    help='choices: default: all)')
 args = parser.parse_args()
 # args.name, args.input, etc.
 
@@ -924,12 +1029,28 @@ out = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8').splitli
 # slurp file in one line, stripping newlines
 [line.strip() for line in open(filename)]
 
-# slurp via pipe:
-ls -al | python -c "import sys; print sys.stdin.readlines()"
+# read a line at a time, allowing for some per line pre-processing
+with open(file_path, "r") as f:
+    while (line := f.readline()):
+        if line.startswith("#!/"):
+            # allow the file to start with a shebang line for executable scripts
+            pass
+        else:
+            content += line
 
-# another
+# slurp via pipe:
+ls -al | python -c "import sys; print(sys.stdin.readlines())"
+
+# another slurp recipe
 with open('data.txt', 'r') as file:
     data = file.read().replace('\n', '')
+
+
+# read a file as lines while removing "\n"
+with open(filename) as f:
+    lines = f.read().splitlines()
+# same plus make one long text joined with whitespace
+text = " ".join(open(path, "r", encoding="UTF-8").read().splitlines())
 
 # detect/skip binary files when manipulating text files
 import os
@@ -1133,6 +1254,70 @@ class Son(Pa):
         print(f"{__class__.__name__}.__init__()") # prints Son
 
 
+# import a class from a module based 2 strings "path.to.module" and "MyClass"
+# https://stackoverflow.com/a/13808375/9201239
+import importlib
+# load the module, will raise ImportError if module cannot be loaded
+m = importlib.import_module(module_name)
+# get the class, will raise AttributeError if class cannot be found
+c = getattr(m, class_name)
+
+# similar: import a class from a module based on a string path.to.module.class
+segments = fqdn_class_str.split(".")
+module_name, class_name = segments[:-1], segments[-1],
+m = importlib.import_module(module_name)
+c = getattr(m, class_name)
+
+
+## Monkey Patching
+
+# instance monkey patching
+
+class MyClass(object):
+    def foo(self, arg):  return arg * 2
+s = MyClass()
+def foo_override(self, arg):  return arg * 4
+
+# 1. via __get__
+s.foo = foo_override.__get__(s, MyClass)
+s.foo(10)
+type(s.foo) # <type 'instancemethod'>
+
+# 2. via types
+import types
+s.foo = types.MethodType(foo_override, s, MyClass)
+s.foo(10)
+
+# 3. via lambda
+s.foo = lambda arg: foo_override(s, arg)
+
+
+
+## Dummy classes
+# get a dummy object
+def create():
+    return object()
+
+# can call any non-existing method, which always returns None
+class Nop(object):
+    def nop(*args, **kw): pass
+    def __getattr__(self, _): return self.nop
+
+# a more elaborate version/variation of the above
+class Dummy:
+
+    def __init__(*args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def __getattr__(self, *args, **kwargs):
+        return self
+
+
+
+
 ### special methods
 
 # __call__() method allows direct object calling as functions
@@ -1187,10 +1372,6 @@ def get_all_subclasses(cls):
     recurse(cls)
 
     return set(subclass_list)
-
-# generator version
-
-#
 
 
 # push a class method into an instance w/o extending the class
@@ -1250,6 +1431,25 @@ inspect.currentframe().f_back.f_code.co_name
 inspect.currentframe().f_code.co_name
 # same
 sys._getframe().f_code.co_name
+
+# check if a certain arg name is in the function's signature
+if 'device_id' in inspect.signature(torch.distributed.init_process_group).parameters: ...
+
+
+### caching ###
+
+# unlimited
+from functools import cache
+@cache
+def ...
+
+# lru version when stack is limited in size
+from functools import lru_cache
+@lru_cache(maxsize=100, typed=False)
+def ...
+
+
+
 
 ### closures ###
 
@@ -1404,6 +1604,12 @@ socket.gethostname()
 import socket
 socket.getfqdn()
 
+# get random free port
+export RANDOM_PORT=$(python3 -c 'import socket; s = socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
+# same using socketserver
+import socketserver
+with socketserver.TCPServer(("localhost", 0), None) as s:
+    free_port = s.server_address[1]
 
 # unique port number under pytest-xdist
 DEFAULT_MASTER_PORT = 10999
@@ -1783,6 +1989,11 @@ python -m cProfile -s tottime -m module
 -s tottime # total time
 -s ncalls  # number of calls
 
+# when seeing:
+ncalls
+12/2
+# this indicates recursion - the smaller number is the number of 'primitive' or non-recursive calls. The larger number is the total number of invocations, including recursive calls.
+
 # 3 different speed profiling ways that agree quite well
 # the ways being tested
 def way1():
@@ -1793,6 +2004,45 @@ def way2():
 import cProfile
 cProfile.run("way1()", sort=-1)
 cProfile.run("way2()", sort=-1)
+# to save results to a file cprofile.results
+cProfile.run("way2()", "cprofile.results", sort=-1)
+
+
+# if a function isn't a global (e.g. local function) cProfile can't see it, so use:
+cProfile.runctx('way1()', None, locals(), sort=-1)
+# the definition is
+cProfile.runctx(command, globals, locals, filename=None, ...)
+# a direct way of running the same (w/o the function wrapper)
+import cProfile
+from pstats import SortKey
+with cProfile.Profile() as pr:
+    x = 1
+# only supports the sort arg - different from print_stats on the Stats object
+pr.print_stats(SortKey.CUMULATIVE)
+
+# the sort keys index are in this table https://docs.python.org/3/library/profile.html#pstats.Stats.sort_stats
+# the 2 interesting options are
+-1 tottime
+ 1 cumulative SortKey.CUMULATIVE
+-2 time       SortKey.TIME
+
+# all keys [c.name for c in SortKey]
+['CALLS', 'CUMULATIVE', 'FILENAME', 'LINE', 'NAME', 'NFL', 'PCALLS', 'STDNAME', 'TIME']
+
+
+# to increase resolution to more than .xxx sec, use this monkey patch, e.g. to 6 decimals (report microsecond resolution)
+import pstats; pstats.f8 = lambda x: f"{x:3.6f}"
+
+# to print only the top N lines:
+from pstats import Stats
+stats = Stats(prof_fwd)
+stats.sort_stats('tottime').print_stats(20)
+stats.sort_stats('cumulative').print_stats(20)
+
+cProfile reports a different time than time.time() with pytorch - research this:
+https://github.com/EricCousineau-TRI/repro/blob/bdef8a14b5/python/cprofile_with_torch/repro.py#L75-L94
+
+
 #
 # 2. timeit
 import timeit
@@ -1890,8 +2140,6 @@ mem_usage = memory_usage(f)
 print('Memory usage (in chunks of .1 seconds): %s' % mem_usage)
 print('Maximum memory usage: %s' % max(mem_usage))
 
-
-
 # get amount of memory used by the object non-recursively, measured in bytes
 # - works for built-in objects.
 # - for 3rd party extensions only if __sizeof__() is implemented (and correctly)
@@ -1947,6 +2195,31 @@ https://github.com/FrancescAlted/ipython_memwatcher
 
 # memprof https://github.com/jmdana/memprof
 # A memory profiler for Python. As easy as adding a decorator
+
+
+###############
+### imports ###
+###############
+
+# remove unused imports
+pip install autoflake
+autoflake --in-place --remove-all-unused-imports
+# remove unused variables
+autoflake --in-place --remove-unused-variables
+
+
+
+###############
+### IPython ###
+###############
+
+# start ipython so that everything is always logged to the same file in the append mode
+ipython --TerminalInteractiveShell.logappend=/path/to/ipython-log.txt
+
+# start ipython so that everything is always logged to the same file overwriting the previous contents
+ipython --TerminalInteractiveShell.logfile=/path/to/ipython-log.txt
+
+alias ipython="ipython --TerminalInteractiveShell.logappend=~/.ipython/ipython-log.txt"
 
 
 #############
@@ -2007,6 +2280,47 @@ alias ddd d;;d;;d
 alias dddd d;;d;;d;;d
 alias ddddd d;;d;;d;;d;;d
 # ------------------->8--------------->8--------------->8-----------
+
+### to debug a program that forks with multiprocessing.Process()
+
+# 1. ForkedPdb:
+# https://stackoverflow.com/a/23654936
+import sys
+import pdb
+
+class ForkedPdb(pdb.Pdb):
+    """
+    PDB Subclass for debugging multi-processed code
+    Suggested in: https://stackoverflow.com/questions/4716533/how-to-attach-debugger-to-a-python-subproccess
+    """
+    def interaction(self, *args, **kwargs):
+        _stdin = sys.stdin
+        try:
+            sys.stdin = open('/dev/stdin')
+            pdb.Pdb.interaction(self, *args, **kwargs)
+        finally:
+            sys.stdin = _stdin
+# then to use:
+ForkedPdb().set_trace()
+
+# 2. Pudb: a console-based visual debugger for Python
+# pip install pudb
+from pudb import forked; forked.set_trace()
+
+# 3. remote-pdb: Remote vanilla PDB (over TCP sockets) done right
+pip install remote-pdb
+import remote_pdb
+remote_pdb.set_trace()
+
+# 4. torch-2.2+ supports ForkedPdb automatically and will handle a single rank, to setup just run
+dist.breakpoint(0) # 0 is the rank to run it on
+# call up;;n right away to get into the actual checkpoint
+
+# 5 Samyam's version
+if torch.distributed.get_rank() == 0:
+    import pdb; pdb.set_trace()
+torch.distributed.barrier()
+
 
 ## advanced pdb https://pypi.python.org/pypi/pdbpp/
 
@@ -2127,6 +2441,9 @@ string    {!r}     string      call `repr` on arguments (! instead of :)
 1.5343    {!s}     1.5343      call `str`  on arguments (! instead of :)
 ---------------------------------------------------------------------------
 
+# to pad booleans and leave them formatted as booleans - coerce a non-string
+f'{True!s:>5},{False!s:>5}'
+
 # named vars
 "I {verb} the {object} off the {place}".format(verb="took", object="cheese", place="table")
 
@@ -2186,6 +2503,36 @@ f"List is :\n{chr(10).join(mylist)}"
 names = ['Adam', 'Bob', 'Cyril']
 print("Winners are:", *names, sep="\n")
 
+## binary formatting
+
+import struct
+def binary_double(num):
+    print(''.join(f'{c:0>8b}' for c in struct.pack('!d', num)))
+binary_double(0.999) # 0011111111101111111101111100111011011001000101101000011100101011
+
+
+# convert from bytes to humas MiBs, GiBs, etc - human
+def sizeof_fmt(num, suffix="B"):
+    for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
+
+# another version https://stackoverflow.com/a/75332100/9201239
+to_human = lambda v : str(v >> ((max(v.bit_length()-1, 0)//10)*10)) +["", "K", "M", "G", "T", "P", "E"][max(v.bit_length()-1, 0)//10]+"iB"
+
+# find the next power of 2
+import math
+def next_power_of_2(x):
+    """
+    take any number and find the next power of 2
+    7.5 => 8
+    8 => 8
+    9 => 16
+    """
+    return 1<<(math.ceil(x)-1).bit_length()
+
 
 ### datetime format ###
 import datetime
@@ -2218,7 +2565,7 @@ datetime.datetime.now().strftime('%Y-%m-%d-%H')
 
 # time
 import time
-time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
+time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 
 # time in seconds
 import time
@@ -2476,6 +2823,10 @@ sys.stdout = f
 
 ### unbuffered output ###
 
+# to unbuffer at the program level - one of these should work:
+python -u
+PYTHONUNBUFFERED=1 python
+
 # only for write() (print) calls
 from sys import stdout, stderr
 def stdout_write_flush(args, w=stdout.write): w(args); stdout.flush()
@@ -2498,13 +2849,9 @@ def init_logger():
     logger.addHandler(h)
     return logger
 
-
-
 # use:
 logger = init_logger()
 logger.debug('...')
-
-
 
 # a more complete version
 class Unbuffered(object):
@@ -2520,6 +2867,13 @@ class Unbuffered(object):
        return getattr(self.stream, attr)
 import sys
 sys.stdout = Unbuffered(sys.stdout)
+
+
+# switch between full buffering and line buffering
+import sys, time;
+sys.stdout.reconfigure(line_buffering=True);
+print("Text.")
+
 
 ### variable existence ###
 
@@ -2543,9 +2897,9 @@ if hasattr(obj, 'attr_name'):
 ### sort ###
 ############
 
-# sort by value
-result = {'a': 1, {'b': 2} }
-l = sorted(result, key = lambda x: result[x])
+# sort keys by value
+result = {'a': 1, 'b': 2}
+l = sorted(result, key=lambda x: result[x])
 
 # sort list of lists by multiple keys in ascending order
 import operator
@@ -2562,6 +2916,17 @@ sorted(student_objects, key=attrgetter('age'))
 
 # case-insensitive string comparison
 sorted("This is a test String".split(), key=str.lower) # ['a', is', 'String', 'test', 'This']
+
+# sort 2 lists together based on values of the 2nd list
+X = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
+Y = [ 0,   1,   1,   0,   1,   2,   2,   0,   1 ]
+# sort X based on Y values
+Y, X = zip(*sorted(zip(Y, X)))
+# X: ('a', 'd', 'h', 'b', 'c', 'e', 'i', 'f', 'g')
+# Y: (0, 0, 0, 1, 1, 1, 1, 2, 2)
+# or to leave Y unchanged
+_, X = zip(*sorted(zip(Y, X)))
+
 
 # list sort only (in-place) (faster than 'sorted' as it doesn't copy)
 l.sort()
@@ -2594,9 +2959,15 @@ fname = os.path.splitext(fname)[0]+'.py'
 # decode binary string
 b'a string'.decode('utf-8')
 
+# detect encoding
+python -c "import sys, io, json, chardet; f=io.open(sys.argv[1], 'r'); print(chardet.detect(f.read().encode()))" 2.jsonl
+# => {'encoding': 'utf-8', 'confidence': 0.99, 'language': ''}
+
 # remove broken utf encoding
 s = "LOS ANGELES ÛÒ SAFETY"
 s.encode('ascii', 'ignore').decode('utf-8', 'ignore') # 'LOS ANGELES  SAFETY'
+# as one liner
+python -c "import sys, io; f=io.open(sys.argv[1], 'r'); print(f.read().encode('ascii', 'ignore').decode('utf-8', 'ignore')))" 2.jsonl > 3.jsonl
 #
 # similar but forces clean ascii
 # remove non-ASCII chars from data
@@ -2822,6 +3193,13 @@ l2 = copy.copy(l)
 import copy
 l2 = copy.deepcopy(l)
 
+# split
+l1 = [0, 2, 3, 2, 3]
+split_size = 2
+[l1[i:i+split_size] for i in range(len(l1))[::split_size]] # [[0, 2], [3, 2], [3]]
+# in python>=3.12
+import itertools
+list(itertools.batched(l1, split_size))
 
 ### list comprehension
 
@@ -2853,7 +3231,7 @@ l = ["--a 1", "--b 2"]
 {k:v for k,v in (x.replace("--", "").split() for x in l)}
 # {'a': '1', 'b': '2'}
 
-# get a Cartesian product of input iterables
+# get a Cartesian product of input iterables (all variations matrix)
 #
 # itertools.product as an equivalent of a generator expression for-loop
 # (but it does not build up intermediate results in memory)
@@ -2888,6 +3266,8 @@ l1 = [ [1,2,3], [4,5], [6], [7], [8,9]] # numbers all level 2
 l2 = [ [1,2,3], [4,5], 6, 7, [8,9]    ] # numbers mixed level 1 and 2
 l3 = [ [1,2,3], [4,5], 6, [7,[8],[9]] ] # numbers mixed level 1, 2 and 3
 s1 = ['aaa', 'bb', 'c', ['xx', 'yyy'] ] # strings
+#
+# note, these will all fail for not-nested lists
 #
 # 1. reduce+iconcat (fastest)
 import functools, operator
@@ -3140,10 +3520,10 @@ a.add(frozenset(b))
 ### dictionaries ###
 ####################
 
-* py37: ordered by insertion order always!.
-* py37: ordered by insertion order for cpython only
-* py36-: unordered by default
-* no key duplicates
+# * py37: ordered by insertion order always!.
+# * py37: ordered by insertion order for cpython only
+# * py36-: unordered by default
+# * no key duplicates
 
 # identity - is this var a dict?
 isinstance(d1, dict)
@@ -3166,7 +3546,7 @@ v = d.pop('a', None) # remove key/value, if doesn't exist return fallback value
 del d['a']     # remove key/value
 
 # combine / merge dicts
-d1.update(d2) # add d2 to d1, overwrite values for existing keys
+d1.update(d2) # add d2 to d1, overwrite values for existing keys - doesn't return anything!
 # or
 dict(d1.items() + d2.items())
 dict(d1, **d2)
@@ -3296,7 +3676,7 @@ from functools import reduce
 super_dict = reduce(lambda a, b: dict(a, **b), dicts)
 # {'a': 1, 'b': 2, 'c': 7, 'd': 2, 'e': 5}
 #
-# to merge values into lists (values can be strings, etc.)
+# to merge values into lists (values can be strings, etc.) - list of dicts to dict of lists
 super_dict = collections.defaultdict(list)
 for d in dicts:
     for k, v in d.items(): super_dict[k].append(v)
@@ -3341,6 +3721,7 @@ dict(zip(classes, range(len(classes)))) # {'a': 0, 'b': 1, 'c': 2}
 
 # to turn a dict into an automatic dataclass-like object, so that the keys can
 # be accessed via a subscription obj["key1"] and also as an accessor obj.key1
+# 1.
 class DictAttr:
     def __init__(self, args):
         for k in args: setattr(self, k, args[k])
@@ -3350,6 +3731,11 @@ data = { "a": 1, "b": 2, }
 obj = DictAttr(data)
 print(obj["a"]) # 1
 print(obj.a)    # 1
+# 2. another solution
+class DictToStruct:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
+obj = DictToStruct(**data)
 
 # compare 2 dicts
 # simple:
@@ -3362,6 +3748,24 @@ dict_1 = { "a": 1, "nested": { "b": 1, } }
 dict_2 = { "a": 2, "nested": { "b": 2, } }
 diff = deepdiff.DeepDiff(dict_1, dict_2)
 print(json.dumps(diff, indent=4))
+
+## dataclass
+
+from dataclasses import dataclass, asdict
+
+@dataclass
+class X():
+    y: int = 1
+x = X()
+x.z = 5
+# shows only attributes created at init (possibly a problem) unless @dataclass(frozen=True) is used,
+# which prevents mutation
+asdict(x)  # {'y': 1}
+# shows all attributes, including those created after init!
+vars(x)    # {'y': 1, 'z': 5}
+# same as vars
+x.__dict__ # {'y': 1, 'z': 5}
+
 
 
 ## utils
@@ -3421,6 +3825,8 @@ for x in ['foo', 'bar']:
 
 # get all attributes of an object (w/o methods, and built-ins)
 attrs = [k for k in self.__dict__.keys() if not k.startswith("__")]
+# this seems to work as well in recent python
+attrs = list(self.config.__dict__.keys())
 #
 # get all object methods (w/o attributes)
 import inspect
@@ -3556,9 +3962,24 @@ with gzip.open('file.gz', 'wb') as f: f.write('Hello world!'.encode())
 ### json ###
 ############
 
-import io, json
+# validate a jsonl file
+perl -ne 'use JSON qw(decode_json); chomp; decode_json($_)' evaluate_news.json
+# if then a specific line number is broken and it's easier to delete it, as in:
+unexpected end of string while parsing JSON string, at character offset 2835 (before "(end of string)") at -e line 1, <> line 3594309.
+# can just delete it by specifying that line number (but make a backup first as the removal is in-place)
+sed -i '3594309d' test.jsonl
+
+# validate json file (empty is the command)
+jq empty test.json
+# probably using this is better:
+echo '{"a":"b" '| jq -rR 'try (fromjson | empty) catch "\(input_line_number): \(.)"'
+1: Unfinished JSON term at EOF at line 1, column 9 (while parsing '{"a":"b" ')
+
+# encode a jsol file
+perl -nle 'use JSON qw(encode_json);chomp; print encode_json {-text=>$_} if length($_)>0' train.txt > ../edt-train.jsonl
 
 # file to json
+import io, json
 with io.open(filename, 'r', encoding='utf-8') as f: s = json.load(f)
 
 # string to json
@@ -3580,6 +4001,95 @@ with io.open(filename, 'w', encoding='utf-8') as f:
 import yaml
 s = '{ "key1": "value1", "key2": "value2", }'
 yaml.load(s)
+
+
+# one liners
+# test the jsonl file can be loaded
+python -c "import sys, io, json; f=io.open(sys.argv[1], 'r', encoding='utf-8'); json.load(f)" file.jsonl
+
+
+# full functions
+import json
+from pathlib import Path
+
+def read_json_file(path):
+    """read .json or .jsonl file and return its contents"""
+    suffix = Path(path).suffix[1:]
+    with open(path, "r", encoding="utf-8") as fh:
+        if suffix == "jsonl":
+            return [json.loads(line) for line in fh]
+        elif suffix == "json":
+            return json.loads(fh.read())
+        else:
+            raise ValueError(f"Expected 'json' or 'jsonl' file extension, but got: {suffix}")
+
+
+def write_json_file(path, data, append=False):
+    """write `data` into a .json or .jsonl file"""
+    suffix = Path(path).suffix[1:]
+    mode = "a" if append else "w"
+    with open(path, mode, encoding="utf-8") as fh:
+        if suffix == "jsonl":
+            fh.write(json.dumps(data, sort_keys=True, ensure_ascii=False))
+            fh.write("\n")
+        elif suffix == "json":
+            fh.write(json.dumps(data, sort_keys=True, indent=1, ensure_ascii=False))
+        else:
+            raise ValueError(f"Expected 'json' or 'jsonl' file extension, but got: {suffix}")
+
+
+def append_json_file(path, data):
+    """append `data` into a .json or .jsonl file"""
+    write_json_file(path, data, append=True)
+
+
+# rewrite jsonl - read it in, extact some part, write back out
+python -c "
+import json, sys;
+fi=open(sys.argv[1], 'r', encoding ='utf8')
+fo=open(sys.argv[2], 'w', encoding ='utf8')
+for line in fi:
+    try:
+        e=json.loads(line)
+    except:
+        print('misformat input')
+        continue
+    #print(e['input']['prompt'])
+    #print()
+    #print('--write start--')
+    try:
+        d=dict(text=e['input']['prompt'])
+    except:
+        print('missing prompt')
+        print(e['input'])
+        continue
+    json.dump(d, fo, sort_keys=True, ensure_ascii=False)
+    #print('--write end--')
+    fo.write('\n')
+" in.jsonl out.jsonl
+
+
+
+# write a jsonl file
+import json
+with open(file, 'w', encoding ='utf8') as fh:
+    for e in elements:
+        json.dump(e, fh, sort_keys=True, ensure_ascii=False)
+        fh.write('\n')
+
+# read a jsonl file
+import json
+with open(file) as f:
+    data = [json.loads(line) for line in f]
+
+# rewrite/repair json
+pip install json-repair
+python -c "import sys, io, json; from json_repair import repair_json; f=io.open(sys.argv[1], 'r', encoding='utf-8'); \
+from json_repair import repair_json; [print(repair_json(s, return_objects=False)) for s in f.readlines()]" file.json > newfile.json
+
+# pip install dirtyjson
+# dirtyjson.loads() supposedly can handle slightly messed up json inputs
+
 
 # to debug json format (loading fails)
 https://jsonlint.com/
@@ -3859,6 +4369,16 @@ except:
     raise type(val).with_traceback(tb) from None
 
 
+# multiple exceptions
+try:
+    some_code()
+except FileNotFoundError:
+    print("WARNING: Could not find file")
+except:
+    raise # will show the real problem
+
+
+
 ###########################################
 ### stuck python processes or segfaults ###
 ###########################################
@@ -4089,7 +4609,12 @@ pipreqs /path/to/project
 pip install pigar
 cd /path/to/project; pigar
 
+################
+### hardware ###
+################
 
+# get cpu-cores
+python -c 'import os; cs=os.sched_getaffinity(0); print(f"{len(cs)} visible cpu cores: {cs}")'
 
 ##############
 ### pytest ###
@@ -4342,6 +4867,80 @@ class CaptureStderr(CaptureStd):
 
     def __init__(self):
         super().__init__(out=False)
+
+
+################
+### archives ###
+################
+
+import os
+import hashlib
+import gzip
+import tarfile
+import zipfile
+
+def _is_tarxz(filename):
+    return filename.endswith(".tar.xz")
+
+
+def _is_tar(filename):
+    return filename.endswith(".tar")
+
+
+def _is_targz(filename):
+    return filename.endswith(".tar.gz")
+
+
+def _is_tgz(filename):
+    return filename.endswith(".tgz")
+
+
+def _is_gzip(filename):
+    return filename.endswith(".gz") and not filename.endswith(".tar.gz")
+
+
+def _is_zip(filename):
+    return filename.endswith(".zip")
+
+
+def extract_archive(from_path, to_path=None, remove_finished=False):
+    if to_path is None:
+        to_path = os.path.dirname(from_path)
+
+    if _is_tar(from_path):
+        with tarfile.open(from_path, 'r') as tar:
+            tar.extractall(path=to_path)
+    elif _is_targz(from_path) or _is_tgz(from_path):
+        with tarfile.open(from_path, 'r:gz') as tar:
+            tar.extractall(path=to_path)
+    elif _is_tarxz(from_path):
+        with tarfile.open(from_path, 'r:xz') as tar:
+            tar.extractall(path=to_path)
+    elif _is_gzip(from_path):
+        to_path = os.path.join(to_path, os.path.splitext(os.path.basename(from_path))[0])
+        with open(to_path, "wb") as out_f, gzip.GzipFile(from_path) as zip_f:
+            out_f.write(zip_f.read())
+    elif _is_zip(from_path):
+        with zipfile.ZipFile(from_path, 'r') as z:
+            z.extractall(to_path)
+    else:
+        raise ValueError("Extraction of {} not supported".format(from_path))
+
+    if remove_finished:
+        os.remove(from_path)
+
+
+
+#######################
+### code formatting ###
+#######################
+
+# remove unused imports
+pip install ruff
+ruff check --select F401 --fix .
+
+# fix F541 f-string is missing placeholders
+ruff check --select F541 --fix
 
 
 ################
