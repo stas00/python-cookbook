@@ -38,6 +38,8 @@ You can build various ebook formats of this book yourself — the instructions f
 
 I maintain a [SKILL.md](./SKILL.md) file that you can use to teach your AI agent everyday Python and standard-library idioms better.
 
+See also the companion skills: [Machine Learning Engineering](https://github.com/stas00/ml-engineering/blob/master/SKILL.md) and [The Art of Debugging](https://github.com/stas00/the-art-of-debugging/blob/master/SKILL.md).
+
 
 ## Related Open Books
 
@@ -57,13 +59,10 @@ The content of this site is distributed under [Attribution-ShareAlike 4.0 Intern
 
 ## My repositories map
 
-✔ **Machine Learning:**
+✔ **Free Books:**
  [ML Engineering Online Book](https://github.com/stas00/ml-engineering) |
- [ML ways](https://github.com/stas00/ml-ways) |
- [Porting](https://github.com/stas00/porting)
-
-✔ **Guides:**
- [The Art of Debugging](https://github.com/stas00/the-art-of-debugging)
+ [The Art of Debugging](https://github.com/stas00/the-art-of-debugging) |
+ [Stas' Python Cookbook](https://github.com/stas00/python-cookbook)
 
 ✔ **Applications:**
  [ipyexperiments](https://github.com/stas00/ipyexperiments)
@@ -77,3 +76,7 @@ The content of this site is distributed under [Attribution-ShareAlike 4.0 Intern
  [python](https://github.com/stas00/python-tools) |
  [tensorboard](https://github.com/stas00/tensorboard-tools) |
  [unix](https://github.com/stas00/unix-tools)
+
+✔ **Other Machine Learning:**
+ [ML ways](https://github.com/stas00/ml-ways) |
+ [Porting](https://github.com/stas00/porting)
