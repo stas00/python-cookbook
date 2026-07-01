@@ -21,16 +21,16 @@ html-local: prep-html-files ## make html version w/ scripts remaining local
 	python build/mdbook/md-to-html.py --local
 
 pdf: html ## make pdf version (from html files)
-	prince --no-author-style -s build/prince_style.css --pdf-title="Stas' Python Cookbook ($$(date))" -o out1.pdf $$(cat chapters-html.txt | tr "\n" " ")
+	prince --no-author-style -s build/prince_style.css --pdf-title="Stas Bekman - Stas' Python Cookbook ($$(date))" -o out1.pdf $$(cat chapters-html.txt | tr "\n" " ")
 	pdftk out1.pdf dump_data output pdf-bookmarks.txt
 	pdftk out1.pdf cat 2-end 1 output out2.pdf
 	pdftk images/Python-Cookbook-book-cover.pdf out2.pdf output out3.pdf
-	pdftk out3.pdf update_info pdf-bookmarks.txt output "Stas' Python Cookbook.pdf"
+	pdftk out3.pdf update_info pdf-bookmarks.txt output "Stas Bekman - Stas' Python Cookbook.pdf"
 
 epub: html ## make epub version (from html files)
 	python build/mdbook/preprocess-html-for-epub.py && \
 	pandoc --from html --to epub3 \
-		--output "Stas' Python Cookbook.epub" \
+		--output "Stas Bekman - Stas' Python Cookbook.epub" \
 		--metadata title="Stas' Python Cookbook" \
 		--metadata author="Stas Bekman" \
 		--metadata date="$$(date +%Y-%m-%d)" \
@@ -40,9 +40,9 @@ epub: html ## make epub version (from html files)
 		$$(cat chapters-html.txt | tr "\n" " ")
 
 upload: pdf epub ## upload pdf to the hub
-	cp "Stas' Python Cookbook.pdf" python-cookbook-book/
-	cp "Stas' Python Cookbook.epub" python-cookbook-book/
-	cd python-cookbook-book/ && git commit -m "new version" "Stas' Python Cookbook.pdf" "Stas' Python Cookbook.epub" && git push
+	cp "Stas Bekman - Stas' Python Cookbook.pdf" python-cookbook-book/
+	cp "Stas Bekman - Stas' Python Cookbook.epub" python-cookbook-book/
+	cd python-cookbook-book/ && git commit -m "new version" "Stas Bekman - Stas' Python Cookbook.pdf" "Stas Bekman - Stas' Python Cookbook.epub" && git push
 
 check-links-local: html-local ## check local links
 	linkchecker --config build/linkcheckerrc $$(cat chapters-html.txt | tr "\n" " ") | tee linkchecker-local.txt

@@ -72,7 +72,7 @@ if __name__ == "__main__":
     md_chapters_file = Path("chapters-md.txt")
     html_chapters_file = Path("chapters-html.txt")
 
-    pdf_file = f"Stas' Python Cookbook ({date}).pdf"
+    pdf_file = f"Stas Bekman - Stas' Python Cookbook ({date}).pdf"
 
     markdown_files = [make_cover_page_file(cover_md_file, date)] + get_markdown_files(md_chapters_file)
 
