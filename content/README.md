@@ -1,8 +1,6 @@
 # Stas' Python Cookbook
 
-> How to read this: skim the Table of Contents, jump to what you need. Each
-> chapter is self-contained. Snippets are written to be copy-paste friendly —
-> imports are shown the first time they're needed in a block.
+> How to read this: skim the Table of Contents, jump to what you need. Each chapter is self-contained. Snippets are written to be copy-paste friendly — imports are shown the first time they're needed in a block.
 
 ## Table of Contents
 
@@ -50,9 +48,7 @@
 
 ### Strings and Text
 
-Strings are immutable sequences of Unicode code points. Every "mutation" returns
-a *new* string, which is why chains of transformations are common and cheap to
-reason about.
+Strings are immutable sequences of Unicode code points. Every "mutation" returns a *new* string, which is why chains of transformations are common and cheap to reason about.
 
 #### Case conversion and checks
 
@@ -68,9 +64,7 @@ s.islower()
 s.istitle()
 ```
 
-Python exposes a whole family of `is*` predicates for classifying string
-content. They operate on the whole string and return `False` for the empty
-string (except where noted):
+Python exposes a whole family of `is*` predicates for classifying string content. They operate on the whole string and return `False` for the empty string (except where noted):
 
 ```python
 "1".isdigit()        # True
@@ -82,9 +76,7 @@ string (except where noted):
 "Hello".isprintable()
 ```
 
-Full set: `isalnum`, `isalpha`, `isascii`, `isdecimal`, `isdigit`,
-`isidentifier`, `islower`, `isnumeric`, `isprintable`, `isspace`, `istitle`,
-`isupper`. Note the subtle differences: `isdecimal ⊂ isdigit ⊂ isnumeric`.
+Full set: `isalnum`, `isalpha`, `isascii`, `isdecimal`, `isdigit`, `isidentifier`, `islower`, `isnumeric`, `isprintable`, `isspace`, `istitle`, `isupper`. Note the subtle differences: `isdecimal ⊂ isdigit ⊂ isnumeric`.
 
 #### Containment, prefixes and suffixes
 
@@ -113,16 +105,14 @@ text.startswith(needle, start, end)
 "-".join(["a", "b", "c"]) # 'a-b-c'   - join iterable of *strings*
 ```
 
-`partition`/`rpartition` split *once* and always return a 3-tuple
-`(before, sep, after)`, which avoids index errors:
+`partition`/`rpartition` split *once* and always return a 3-tuple `(before, sep, after)`, which avoids index errors:
 
 ```python
 "key=value=x".partition("=")   # ('key', '=', 'value=x')
 "key=value=x".rpartition("=")  # ('key=value', '=', 'x')
 ```
 
-For shell-like tokenization (respecting quotes), reach for `shlex` instead of
-`split`:
+For shell-like tokenization (respecting quotes), reach for `shlex` instead of `split`:
 
 ```python
 import shlex
@@ -132,8 +122,7 @@ shlex.split('program --name="two words" -v')
 
 #### Stripping
 
-`strip`/`lstrip`/`rstrip` remove *sets of characters* from the ends — not a
-prefix/suffix substring, which surprises people:
+`strip`/`lstrip`/`rstrip` remove *sets of characters* from the ends — not a prefix/suffix substring, which surprises people:
 
 ```python
 "  hi  ".strip()              # 'hi'
@@ -182,8 +171,7 @@ ftfy.fix_text("âœ” No problems")  # '✔ No problems'
 
 #### Comparing strings with a readable diff
 
-When two strings should be equal but aren't, a character-level diff with context
-saves time:
+When two strings should be equal but aren't, a character-level diff with context saves time:
 
 ```python
 import difflib
@@ -213,16 +201,13 @@ from string import Template
 Template("Hey, $name!").substitute(name="Peter")   # 'Hey, Peter!'
 ```
 
-`Template` is handy for user-supplied templates because it can't execute
-arbitrary code the way f-strings and `str.format` can.
+`Template` is handy for user-supplied templates because it can't execute arbitrary code the way f-strings and `str.format` can.
 
 ---
 
 ### String Formatting
 
-Modern Python has three formatting styles. Prefer **f-strings** for readability;
-fall back to `str.format` when the template is separate from the data (e.g.
-loaded from config), and avoid `%` except in legacy code and logging.
+Modern Python has three formatting styles. Prefer **f-strings** for readability; fall back to `str.format` when the template is separate from the data (e.g. loaded from config), and avoid `%` except in legacy code and logging.
 
 ```python
 name, n = "Ada", 42
@@ -278,8 +263,7 @@ f"{{literal}} and {x}"        # '{literal} and 42'
 f"{True!s:>5}"                # '  True'
 ```
 
-Backslashes can't appear inside the `{}` of an f-string before 3.12. Work around
-it with `chr(10)` for newlines, or build the string outside:
+Backslashes can't appear inside the `{}` of an f-string before 3.12. Work around it with `chr(10)` for newlines, or build the string outside:
 
 ```python
 nl = chr(10)
@@ -327,8 +311,7 @@ round(3.14159, 2)   # 3.14
 abs(-3), 3 ** 2, 7 // 2, 7 % 2, divmod(7, 2)   # 3, 9, 3, 1, (3, 1)
 ```
 
-> Gotcha: `round()` uses *banker's rounding* (round-half-to-even), so
-> `round(0.5) == 0` and `round(2.5) == 2`. For money, use `decimal.Decimal`.
+> Gotcha: `round()` uses *banker's rounding* (round-half-to-even), so `round(0.5) == 0` and `round(2.5) == 2`. For money, use `decimal.Decimal`.
 
 Rounding to an arbitrary base:
 
@@ -363,8 +346,7 @@ from collections import Counter
 Counter([1, 1, 2, 3, 3, 3]).most_common(1)   # [(3, 3)]
 ```
 
-`Counter.most_common` is the robust "majority vote" tool — see
-[Dictionaries](#dictionaries).
+`Counter.most_common` is the robust "majority vote" tool — see [Dictionaries](#dictionaries).
 
 #### Special values
 
@@ -380,10 +362,7 @@ math.isinf(x)
 
 ### Regular Expressions
 
-The `re` module implements Perl-style regexes. Compile patterns you reuse; use
-raw strings (`r"..."`) so backslashes reach the regex engine intact. For
-building and debugging complex patterns, [regex101.com](https://regex101.com/)
-and [pythex.org](https://pythex.org/) are invaluable.
+The `re` module implements Perl-style regexes. Compile patterns you reuse; use raw strings (`r"..."`) so backslashes reach the regex engine intact. For building and debugging complex patterns, [regex101.com](https://regex101.com/) and [pythex.org](https://pythex.org/) are invaluable.
 
 #### The core functions
 
@@ -474,8 +453,7 @@ re.findall(rf"torch\s+: {re.escape(ver)}", buf)
 
 #### A worked example: text normalization
 
-Combining several ideas — lowercase, strip punctuation, drop stop words, unescape
-HTML/URL encodings, and tokenize:
+Combining several ideas — lowercase, strip punctuation, drop stop words, unescape HTML/URL encodings, and tokenize:
 
 ```python
 import re, string, html, urllib.parse
@@ -516,8 +494,7 @@ val = s.pop()        # remove & return last (stack: LIFO)
 val = s.pop(0)       # remove & return first (queue: FIFO, but O(n))
 ```
 
-For heavy prepend/pop-left workloads use `collections.deque`, which is O(1) at
-both ends:
+For heavy prepend/pop-left workloads use `collections.deque`, which is O(1) at both ends:
 
 ```python
 from collections import deque
@@ -538,8 +515,7 @@ b = copy.deepcopy(a)# deep - recursively copies nested objects
 b = a               # NOT a copy - both names point to the same list!
 ```
 
-> The classic bug: `listB = listA` then `listB.append(1)` mutates `listA` too,
-> because both names reference one object.
+> The classic bug: `listB = listA` then `listB.append(1)` mutates `listA` too, because both names reference one object.
 
 #### Slicing and splicing
 
@@ -598,16 +574,13 @@ np.arange(0.0, 1.0, 0.1)
 np.linspace(0, 1, 11)      # 11 evenly spaced points, endpoint included
 ```
 
-See [Comprehensions, Iterators and itertools](#comprehensions-iterators-and-itertools)
-for flattening, zipping, products and more.
+See [Comprehensions, Iterators and itertools](#comprehensions-iterators-and-itertools) for flattening, zipping, products and more.
 
 ---
 
 ### Tuples
 
-Tuples are immutable sequences. Because they're immutable they're **hashable**
-(usable as dict keys and set members), slightly faster than lists, and signal
-intent ("this collection won't change").
+Tuples are immutable sequences. Because they're immutable they're **hashable** (usable as dict keys and set members), slightly faster than lists, and signal intent ("this collection won't change").
 
 ```python
 t = (1, 2, 3)
@@ -643,8 +616,7 @@ class Point(NamedTuple):
 
 ### Sets
 
-Sets are unordered collections of unique, hashable items — ideal for membership
-tests (O(1)) and de-duplication.
+Sets are unordered collections of unique, hashable items — ideal for membership tests (O(1)) and de-duplication.
 
 ```python
 a = {1, 2, 3, 4}        # set literal (but {} is an empty DICT!)
@@ -674,8 +646,7 @@ a.discard(99)   # no error if missing
 a.remove(99)    # KeyError if missing
 ```
 
-Use `frozenset` for an immutable (hashable) set — e.g. to put sets inside sets
-or use them as dict keys:
+Use `frozenset` for an immutable (hashable) set — e.g. to put sets inside sets or use them as dict keys:
 
 ```python
 nested = {frozenset({1, 2}), frozenset({3, 4})}
@@ -685,8 +656,7 @@ nested = {frozenset({1, 2}), frozenset({3, 4})}
 
 ### Dictionaries
 
-The workhorse mapping. Since **3.7** dicts preserve insertion order as a
-language guarantee (CPython did so in 3.6). Keys must be hashable.
+The workhorse mapping. Since **3.7** dicts preserve insertion order as a language guarantee (CPython did so in 3.6). Keys must be hashable.
 
 #### Construction and merging
 
@@ -800,8 +770,7 @@ deepdiff.DeepDiff(d1, d2)   # structured, recursive difference
 
 #### dataclasses — structured records
 
-For anything with named fields, prefer a dataclass over a bare dict — you get
-types, defaults, `__init__`, `__repr__`, and `__eq__` for free:
+For anything with named fields, prefer a dataclass over a bare dict — you get types, defaults, `__init__`, `__repr__`, and `__eq__` for free:
 
 ```python
 from dataclasses import dataclass, field, asdict
@@ -818,15 +787,13 @@ asdict(cfg)              # -> plain dict, recursively
 Config(frozen=True)      # make it immutable & hashable via @dataclass(frozen=True)
 ```
 
-> Gotcha: never use a mutable default directly (`tags: list = []`) — it would be
-> shared across all instances. Use `field(default_factory=list)`.
+> Gotcha: never use a mutable default directly (`tags: list = []`) — it would be shared across all instances. Use `field(default_factory=list)`.
 
 ---
 
 ### Comprehensions, Iterators and itertools
 
-Comprehensions are the Pythonic way to build collections — they're faster than
-equivalent loops and often clearer.
+Comprehensions are the Pythonic way to build collections — they're faster than equivalent loops and often clearer.
 
 #### List / dict / set / generator forms
 
@@ -842,8 +809,7 @@ equivalent loops and often clearer.
 
 #### Nested comprehensions
 
-The loop order matches a normal nested `for` read left to right; the expression
-goes first:
+The loop order matches a normal nested `for` read left to right; the expression goes first:
 
 ```python
 # flatten one level: for row in matrix: for x in row
@@ -890,13 +856,11 @@ xs, ys = zip(*pairs)            # unzip back into two tuples
 ys, xs = zip(*sorted(zip(ys, xs)))
 ```
 
-> `zip` stops at the shortest input. Use `itertools.zip_longest` to pad, or
-> `zip(a, b, strict=True)` (3.10+) to *require* equal lengths.
+> `zip` stops at the shortest input. Use `itertools.zip_longest` to pad, or `zip(a, b, strict=True)` (3.10+) to *require* equal lengths.
 
 #### Generators and `yield`
 
-Generators produce values lazily, which keeps memory flat for large or infinite
-streams:
+Generators produce values lazily, which keeps memory flat for large or infinite streams:
 
 ```python
 def read_big(path):
@@ -929,8 +893,7 @@ def g(a, b, /, c, *, d):     # a,b positional-only; d keyword-only (3.8+)
     ...
 ```
 
-> Gotcha: default arguments are evaluated **once**, at definition time. Never use
-> a mutable default:
+> Gotcha: default arguments are evaluated **once**, at definition time. Never use a mutable default:
 > ```python
 > def bad(x, acc=[]):      # acc is shared across calls!
 >     acc.append(x); return acc
@@ -940,21 +903,18 @@ def g(a, b, /, c, *, d):     # a,b positional-only; d keyword-only (3.8+)
 
 #### Pass-by-object-reference
 
-Python passes references by assignment. Mutating a mutable argument in place is
-visible to the caller; rebinding the name is not:
+Python passes references by assignment. Mutating a mutable argument in place is visible to the caller; rebinding the name is not:
 
 ```python
 def mutate(a):  a[0] = 99      # caller sees the change
 def rebind(a):  a = [99]       # caller does NOT see it
 ```
 
-Immutable objects (int, str, tuple) can't be changed in place at all, so
-functions can only communicate back via return values.
+Immutable objects (int, str, tuple) can't be changed in place at all, so functions can only communicate back via return values.
 
 #### Closures
 
-Inner functions capture their enclosing scope. To *reassign* a captured variable
-use `nonlocal`:
+Inner functions capture their enclosing scope. To *reassign* a captured variable use `nonlocal`:
 
 ```python
 def make_counter():
@@ -966,8 +926,7 @@ def make_counter():
     return inc
 ```
 
-> The late-binding trap: closures capture variables, not values. In a loop,
-> bind the current value with a default argument:
+> The late-binding trap: closures capture variables, not values. In a loop, bind the current value with a default argument:
 > ```python
 > funcs = [lambda x, v=v: v + x for v in range(4)]   # correct
 > ```
@@ -990,8 +949,7 @@ def slow(x): ...
 
 #### Decorators
 
-A decorator wraps a function to add behavior. Use `functools.wraps` to preserve
-the wrapped function's metadata:
+A decorator wraps a function to add behavior. Use `functools.wraps` to preserve the wrapped function's metadata:
 
 ```python
 from functools import wraps
@@ -1011,8 +969,7 @@ def timed(fn):
 def work(): ...
 ```
 
-A robust pattern for optional dependencies — provide a no-op fallback so code
-keeps working if a decorator isn't available:
+A robust pattern for optional dependencies — provide a no-op fallback so code keeps working if a decorator isn't available:
 
 ```python
 try:
@@ -1060,9 +1017,7 @@ class Vector:
         return Vector(self.x * k, self.y * k)
 ```
 
-Operator hooks include `__sub__`, `__mul__`, `__truediv__`, `__pow__`,
-`__lt__`, `__le__`, `__gt__`, `__ge__`, `__ne__`, `__neg__`, `__abs__`,
-`__getitem__`, `__setitem__`, `__contains__`, `__iter__`, and more.
+Operator hooks include `__sub__`, `__mul__`, `__truediv__`, `__pow__`, `__lt__`, `__le__`, `__gt__`, `__ge__`, `__ne__`, `__neg__`, `__abs__`, `__getitem__`, `__setitem__`, `__contains__`, `__iter__`, and more.
 
 A quick vertical dump for debugging:
 
@@ -1102,8 +1057,7 @@ for name in ["start", "stop"]:
     getattr(obj, name)()
 ```
 
-Delegate unknown attributes to a member (composition over inheritance) via
-`__getattr__`, which is only called when normal lookup fails:
+Delegate unknown attributes to a member (composition over inheritance) via `__getattr__`, which is only called when normal lookup fails:
 
 ```python
 class Wrapper:
@@ -1152,8 +1106,7 @@ with opened("x.txt") as f:
     ...
 ```
 
-`contextlib.nullcontext()` is a do-nothing manager, perfect for conditional
-`with` blocks:
+`contextlib.nullcontext()` is a do-nothing manager, perfect for conditional `with` blocks:
 
 ```python
 from contextlib import nullcontext
@@ -1166,8 +1119,7 @@ with ctx:
 
 ### Dates and Times
 
-The stdlib splits time handling across `datetime`, `time`, and `timeit`. Prefer
-`datetime` for calendar work, `time.perf_counter()` for measuring durations.
+The stdlib splits time handling across `datetime`, `time`, and `timeit`. Prefer `datetime` for calendar work, `time.perf_counter()` for measuring durations.
 
 #### Parsing and formatting
 
@@ -1181,9 +1133,7 @@ import dateutil.parser        # pip install python-dateutil - guesses the format
 dateutil.parser.parse("Feb 1 2013 5am")
 ```
 
-Common `strftime` codes: `%Y` year, `%m` month, `%d` day, `%H`/`%I` hour
-24/12, `%M` minute, `%S` second, `%p` AM/PM, `%a`/`%A` weekday, `%b`/`%B` month
-name, `%j` day-of-year, `%w` weekday number, `%Z` timezone, `%%` literal `%`.
+Common `strftime` codes: `%Y` year, `%m` month, `%d` day, `%H`/`%I` hour 24/12, `%M` minute, `%S` second, `%p` AM/PM, `%a`/`%A` weekday, `%b`/`%B` month name, `%j` day-of-year, `%w` weekday number, `%Z` timezone, `%%` literal `%`.
 
 #### Time zones (be explicit!)
 
@@ -1196,8 +1146,7 @@ from zoneinfo import ZoneInfo           # 3.9+
 datetime.now(ZoneInfo("America/New_York"))
 ```
 
-> Store and transmit timestamps in UTC; convert to local only for display.
-> "Naive" datetimes (no tzinfo) are a frequent source of off-by-hours bugs.
+> Store and transmit timestamps in UTC; convert to local only for display. "Naive" datetimes (no tzinfo) are a frequent source of off-by-hours bugs.
 
 #### Arithmetic and durations
 
@@ -1259,8 +1208,7 @@ import sys
 print("\n".join(sys.path))       # the import search path, in order
 ```
 
-Add a directory so sibling modules can be imported, computing paths relative to
-the current file (Perl `FindBin` style) rather than the CWD:
+Add a directory so sibling modules can be imported, computing paths relative to the current file (Perl `FindBin` style) rather than the CWD:
 
 ```python
 import sys
@@ -1291,8 +1239,7 @@ import mymod
 mymod = reload(mymod)            # pick up code changes in a REPL
 ```
 
-> After `reload`, objects created before the reload still reference the *old*
-> classes. Recreate them to use the new definitions.
+> After `reload`, objects created before the reload still reference the *old* classes. Recreate them to use the new definitions.
 
 #### Dynamic import
 
@@ -1306,8 +1253,7 @@ cls = getattr(mod, "ClassName")
 
 ### Files, Paths and I/O
 
-Prefer `pathlib.Path` for path manipulation — it's object-oriented, cross
--platform, and replaces most of `os.path`.
+Prefer `pathlib.Path` for path manipulation — it's object-oriented, cross -platform, and replaces most of `os.path`.
 
 #### pathlib basics
 
@@ -1476,8 +1422,7 @@ from pprint import pprint
 pprint(vars(args))               # dump all parsed values
 ```
 
-For richer CLIs consider [`click`](https://click.palletsprojects.com/),
-[`typer`](https://typer.tiangolo.com/) (type-hint based), or `fire`.
+For richer CLIs consider [`click`](https://click.palletsprojects.com/), [`typer`](https://typer.tiangolo.com/) (type-hint based), or `fire`.
 
 #### Replaying the exact command line
 
@@ -1492,8 +1437,7 @@ print(sys.executable, " ".join(map(shlex.quote, sys.argv)))
 
 ### Subprocess and Shell Integration
 
-`subprocess.run` is the modern, high-level entry point. Pass a *list* of
-arguments (not a shell string) to avoid quoting bugs and shell injection.
+`subprocess.run` is the modern, high-level entry point. Pass a *list* of arguments (not a shell string) to avoid quoting bugs and shell injection.
 
 ```python
 import subprocess
@@ -1537,8 +1481,7 @@ signal.signal(signal.SIGINT, terminate)
 signal.signal(signal.SIGTERM, terminate)
 ```
 
-> Only use `shell=True` if you truly need shell features, and never with
-> untrusted input. Otherwise pass an argument list.
+> Only use `shell=True` if you truly need shell features, and never with untrusted input. Otherwise pass an argument list.
 
 ---
 
@@ -1585,8 +1528,7 @@ class DataclassEncoder(json.JSONEncoder):
 json.dumps(cfg, cls=DataclassEncoder)
 ```
 
-Tolerating slightly malformed JSON (trailing commas etc.) — parse it as YAML,
-or use `json-repair`:
+Tolerating slightly malformed JSON (trailing commas etc.) — parse it as YAML, or use `json-repair`:
 
 ```python
 import yaml
@@ -1615,8 +1557,7 @@ with open("out.csv", "w", newline="") as f:
 
 #### Pickle
 
-Python-native object serialization. **Never unpickle untrusted data** — it can
-execute arbitrary code.
+Python-native object serialization. **Never unpickle untrusted data** — it can execute arbitrary code.
 
 ```python
 import pickle
@@ -1666,13 +1607,10 @@ with zipfile.ZipFile("a.zip") as z:
 
 ### Concurrency: Processes, Threads and the GIL
 
-CPython has a **Global Interpreter Lock (GIL)**: only one thread executes Python
-bytecode at a time. The practical rule of thumb:
+CPython has a **Global Interpreter Lock (GIL)**: only one thread executes Python bytecode at a time. The practical rule of thumb:
 
-- **CPU-bound** work → `multiprocessing` (or `ProcessPoolExecutor`): real
-  parallelism across cores.
-- **I/O-bound** work (network, disk) → threads or `asyncio`: the GIL is released
-  during blocking I/O, so threads help here.
+- **CPU-bound** work → `multiprocessing` (or `ProcessPoolExecutor`): real parallelism across cores.
+- **I/O-bound** work (network, disk) → threads or `asyncio`: the GIL is released during blocking I/O, so threads help here.
 
 #### Process pool
 
@@ -1775,8 +1713,7 @@ print("no newline", end="")
 print(*mylist, sep="\n")            # unpack an iterable onto separate lines
 ```
 
-Overwriting the current line (progress bars) with carriage return and a VT100
-"erase line" escape:
+Overwriting the current line (progress bars) with carriage return and a VT100 "erase line" escape:
 
 ```python
 print("working...", end="")
@@ -1870,8 +1807,7 @@ with warnings.catch_warnings():                           # scoped
 warnings.filterwarnings("error")     # turn warnings into exceptions (find them!)
 ```
 
-Externally: `python -W error script.py` or `PYTHONWARNINGS=error`. Filter
-actions: `default`, `error`, `always`, `module`, `once`, `ignore`.
+Externally: `python -W error script.py` or `PYTHONWARNINGS=error`. Filter actions: `default`, `error`, `always`, `module`, `once`, `ignore`.
 
 ---
 
@@ -1894,10 +1830,7 @@ python -m pdb script.py          # start under pdb
 python -m pdb -c continue app.py # run; drop into pdb on an uncaught exception
 ```
 
-Key pdb commands: `n` (next), `s` (step in), `c` (continue), `r` (return),
-`l`/`ll` (list source), `p`/`pp expr` (print), `w` (where/stack), `u`/`d`
-(up/down the stack), `b file:line` (breakpoint), `q` (quit),
-`interact` (a full Python REPL in the current frame).
+Key pdb commands: `n` (next), `s` (step in), `c` (continue), `r` (return), `l`/`ll` (list source), `p`/`pp expr` (print), `w` (where/stack), `u`/`d` (up/down the stack), `b file:line` (breakpoint), `q` (quit), `interact` (a full Python REPL in the current frame).
 
 #### Debugging forked / multiprocess code
 
@@ -1919,13 +1852,11 @@ class ForkedPdb(pdb.Pdb):
 ForkedPdb().set_trace()
 ```
 
-For remote processes there's `remote-pdb` (debug over a TCP socket) and `pudb`
-(a full-screen console debugger: `python -m pudb.run script.py`).
+For remote processes there's `remote-pdb` (debug over a TCP socket) and `pudb` (a full-screen console debugger: `python -m pudb.run script.py`).
 
 #### Getting a traceback out of a stuck or crashed process
 
-`faulthandler` can dump every thread's stack on a signal or timer — the fastest
-way to see *where* a hung program is stuck:
+`faulthandler` can dump every thread's stack on a signal or timer — the fastest way to see *where* a hung program is stuck:
 
 ```python
 import faulthandler, signal
@@ -1936,8 +1867,7 @@ faulthandler.dump_traceback_later(20, repeat=True)   # dump every 20s
 #   python -X faulthandler script.py
 ```
 
-Attach to an *already running* process without any code changes using
-[`py-spy`](https://github.com/benfred/py-spy):
+Attach to an *already running* process without any code changes using [`py-spy`](https://github.com/benfred/py-spy):
 
 ```bash
 pip install py-spy
@@ -2055,8 +1985,7 @@ def show_caller_locals():
 
 ### Profiling CPU and Memory
 
-Measure before you optimize. Start coarse (which function is slow?), then go
-fine (which line?).
+Measure before you optimize. Start coarse (which function is slow?), then go fine (which line?).
 
 #### Timing quick experiments
 
@@ -2087,8 +2016,7 @@ with cProfile.Profile() as pr:
 Stats(pr).sort_stats(SortKey.CUMULATIVE).print_stats(20)   # top 20
 ```
 
-Columns: `ncalls` (calls; `12/2` means recursion — total/primitive), `tottime`
-(time in the function excluding sub-calls), `cumtime` (including sub-calls).
+Columns: `ncalls` (calls; `12/2` means recursion — total/primitive), `tottime` (time in the function excluding sub-calls), `cumtime` (including sub-calls).
 
 Visualize the call graph:
 
@@ -2149,8 +2077,7 @@ objsize.get_deep_size(obj)
 
 #### Finding leaks
 
-Normal objects free immediately (refcounting); cycles wait for the garbage
-collector. To hunt leaks:
+Normal objects free immediately (refcounting); cycles wait for the garbage collector. To hunt leaks:
 
 ```python
 import gc
@@ -2162,10 +2089,7 @@ objgraph.show_most_common_types()
 objgraph.show_growth()         # what grew since last call?
 ```
 
-Other tools worth knowing: [`memray`](https://github.com/bloomberg/memray)
-(tracks C/C++ allocations too), `memory_profiler` (line-by-line RAM),
-[`pyinstrument`](https://github.com/joerick/pyinstrument) (statistical profiler
-with a readable call tree).
+Other tools worth knowing: [`memray`](https://github.com/bloomberg/memray) (tracks C/C++ allocations too), `memory_profiler` (line-by-line RAM), [`pyinstrument`](https://github.com/joerick/pyinstrument) (statistical profiler with a readable call tree).
 
 ---
 
@@ -2173,8 +2097,7 @@ with a readable call tree).
 
 #### Raising and catching
 
-Pick the most specific built-in exception (see the
-[exception hierarchy](https://docs.python.org/3/library/exceptions.html#exception-hierarchy)):
+Pick the most specific built-in exception (see the [exception hierarchy](https://docs.python.org/3/library/exceptions.html#exception-hierarchy)):
 
 ```python
 raise ValueError("bad argument: expected a positive int")
@@ -2226,8 +2149,7 @@ class RetryableError(ConfigError):
 
 #### Good habits
 
-- Catch the narrowest exception that makes sense; a bare `except:` also swallows
-  `KeyboardInterrupt` and `SystemExit`.
+- Catch the narrowest exception that makes sense; a bare `except:` also swallows `KeyboardInterrupt` and `SystemExit`.
 - Never `except: pass` silently — at minimum log it.
 - Use `try/finally` or context managers to guarantee cleanup.
 - Add context to the message; the traceback already tells you *where*.
@@ -2236,8 +2158,7 @@ class RetryableError(ConfigError):
 
 ### Testing with pytest and unittest
 
-`pytest` is the de-facto standard: plain `assert`, powerful fixtures, and a huge
-plugin ecosystem. `unittest` ships with Python and shows up in many codebases.
+`pytest` is the de-facto standard: plain `assert`, powerful fixtures, and a huge plugin ecosystem. `unittest` ships with Python and shows up in many codebases.
 
 #### pytest basics
 
@@ -2265,8 +2186,7 @@ pytest -x --ff                     # stop on first failure, failed-first
 pytest -q                          # quiet
 ```
 
-Useful output flags: `-s` (show prints), `-rA` (show captured output for all
-outcomes), `-rs` (why tests were skipped), `--disable-warnings`, `--color=no`.
+Useful output flags: `-s` (show prints), `-rA` (show captured output for all outcomes), `-rs` (why tests were skipped), `--disable-warnings`, `--color=no`.
 
 #### Fixtures
 
@@ -2286,8 +2206,7 @@ def test_reads_config(tmp_config):
     assert tmp_config.exists()
 ```
 
-Built-in fixtures worth knowing: `tmp_path`, `tmp_path_factory`, `capsys`/
-`capfd` (capture output), `monkeypatch` (patch env/attrs safely), `caplog`.
+Built-in fixtures worth knowing: `tmp_path`, `tmp_path_factory`, `capsys`/ `capfd` (capture output), `monkeypatch` (patch env/attrs safely), `caplog`.
 
 #### Capturing output
 
@@ -2312,8 +2231,7 @@ pip install pytest-timeout
 pytest --timeout=180           # fail tests that hang
 ```
 
-Give parallel workers distinct resources (e.g. network ports) using the worker
-id:
+Give parallel workers distinct resources (e.g. network ports) using the worker id:
 
 ```python
 import os
@@ -2344,8 +2262,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-Capturing stdout under `unittest` (where `capsys` isn't available) via
-`mock.patch`:
+Capturing stdout under `unittest` (where `capsys` isn't available) via `mock.patch`:
 
 ```python
 import io, unittest.mock
@@ -2356,8 +2273,7 @@ def test_output(mock_stdout):
     assert "hi" in mock_stdout.getvalue()
 ```
 
-> pytest can run `unittest.TestCase` classes directly, so you can adopt pytest's
-> runner without rewriting existing tests.
+> pytest can run `unittest.TestCase` classes directly, so you can adopt pytest's runner without rewriting existing tests.
 
 ---
 
@@ -2391,8 +2307,7 @@ except PackageNotFoundError:
 
 #### Comparing versions correctly
 
-Don't compare version strings lexically (`"2.10" < "2.9"` is `True`!). Use
-`packaging`, which understands pre/post/dev releases:
+Don't compare version strings lexically (`"2.10" < "2.9"` is `True`!). Use `packaging`, which understands pre/post/dev releases:
 
 ```python
 from packaging import version
@@ -2416,9 +2331,7 @@ pip install -r requirements.txt
 deactivate
 ```
 
-Faster modern alternatives: [`uv`](https://github.com/astral-sh/uv) and
-[`pip-tools`](https://github.com/jazzband/pip-tools) for locked, reproducible
-installs.
+Faster modern alternatives: [`uv`](https://github.com/astral-sh/uv) and [`pip-tools`](https://github.com/jazzband/pip-tools) for locked, reproducible installs.
 
 ---
 
@@ -2431,8 +2344,7 @@ pip install pipreqs
 pipreqs /path/to/project      # scans imports -> requirements.txt
 ```
 
-`pip freeze > requirements.txt` captures the *entire* environment (including
-transitive deps); `pipreqs` captures only what your code imports.
+`pip freeze > requirements.txt` captures the *entire* environment (including transitive deps); `pipreqs` captures only what your code imports.
 
 #### Modern packaging with pyproject.toml
 
@@ -2471,8 +2383,7 @@ python setup.py bdist_wheel        # wheel
 
 ### Code Quality and Formatting
 
-[`ruff`](https://github.com/astral-sh/ruff) is a fast, all-in-one linter and
-formatter that replaces flake8, isort, autoflake, and more:
+[`ruff`](https://github.com/astral-sh/ruff) is a fast, all-in-one linter and formatter that replaces flake8, isort, autoflake, and more:
 
 ```bash
 pip install ruff
@@ -2482,17 +2393,14 @@ ruff check --select F401 --fix .   # remove unused imports
 ruff format .                      # format (Black-compatible)
 ```
 
-Other staples: `black` (formatter), `isort` (import sorting), `mypy` /
-`pyright` (static type checking), `pre-commit` (run all of these on `git
-commit`). Fix indentation of legacy code with `reindent`:
+Other staples: `black` (formatter), `isort` (import sorting), `mypy` / `pyright` (static type checking), `pre-commit` (run all of these on `git commit`). Fix indentation of legacy code with `reindent`:
 
 ```bash
 pip install reindent
 reindent -r .                      # normalize to 4-space indentation
 ```
 
-Adopt type hints incrementally — they document intent and unlock static
-checking:
+Adopt type hints incrementally — they document intent and unlock static checking:
 
 ```python
 def greet(name: str, times: int = 1) -> str:
@@ -2503,24 +2411,16 @@ def greet(name: str, times: int = 1) -> str:
 
 ### Big Data and Scaling Pointers
 
-When data outgrows a single machine's memory or a single core, these libraries
-extend familiar APIs:
+When data outgrows a single machine's memory or a single core, these libraries extend familiar APIs:
 
-- **[Dask](https://docs.dask.org/)** — parallel/larger-than-memory NumPy,
-  pandas, and task graphs.
-- **[Modin](https://github.com/modin-project/modin)** — drop-in pandas
-  replacement (`import modin.pandas as pd`) that parallelizes across cores.
-- **[Vaex](https://github.com/vaexio/vaex)** — out-of-core DataFrames for
-  billion-row tables.
+- **[Dask](https://docs.dask.org/)** — parallel/larger-than-memory NumPy, pandas, and task graphs.
+- **[Modin](https://github.com/modin-project/modin)** — drop-in pandas replacement (`import modin.pandas as pd`) that parallelizes across cores.
+- **[Vaex](https://github.com/vaexio/vaex)** — out-of-core DataFrames for billion-row tables.
 - **[Ray](https://www.ray.io/)** — general distributed execution for Python.
-- **[Polars](https://pola.rs/)** — fast, multi-threaded DataFrames (Arrow-based);
-  excellent single-node performance.
-- **[PyArrow](https://arrow.apache.org/docs/python/)** — the columnar memory
-  format underpinning much of the above.
+- **[Polars](https://pola.rs/)** — fast, multi-threaded DataFrames (Arrow-based); excellent single-node performance.
+- **[PyArrow](https://arrow.apache.org/docs/python/)** — the columnar memory format underpinning much of the above.
 
-Rule of thumb: exhaust single-machine options (better algorithms, `polars`,
-chunked processing, `numpy` vectorization) before reaching for a distributed
-framework — distribution adds real operational complexity.
+Rule of thumb: exhaust single-machine options (better algorithms, `polars`, chunked processing, `numpy` vectorization) before reaching for a distributed framework — distribution adds real operational complexity.
 
 ---
 
@@ -2574,16 +2474,12 @@ print(pd.DataFrame(records).to_markdown(index=False))
 
 #### Where to go next
 
-- [The Python Tutorial](https://docs.python.org/3/tutorial/) and
-  [Standard Library reference](https://docs.python.org/3/library/) — the
-  canonical sources.
+- [The Python Tutorial](https://docs.python.org/3/tutorial/) and [Standard Library reference](https://docs.python.org/3/library/) — the canonical sources.
 - [pyformat.info](https://pyformat.info/) — string formatting by example.
 - [regex101.com](https://regex101.com/) — build and debug regexes interactively.
 - [Real Python](https://realpython.com/) — high-quality tutorials.
-- `python -m this` — the Zen of Python; a good compass when choosing between
-  approaches.
+- `python -m this` — the Zen of Python; a good compass when choosing between approaches.
 
 ---
 
-*This book favors clarity and the standard library. When a third-party package
-is suggested, it's called out with `pip install`.*
+*This book favors clarity and the standard library. When a third-party package is suggested, it's called out with `pip install`.*

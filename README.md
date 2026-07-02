@@ -1,17 +1,10 @@
 # Stas' Python Cookbook
 
-An open book of practical, example-driven recipes for the Python standard
-library and the idioms that come up again and again in real work — text
-wrangling, data structures, files and processes, debugging, profiling, testing,
-and packaging.
+An open book of practical, example-driven recipes for the Python standard library and the idioms that come up again and again in real work — text wrangling, data structures, files and processes, debugging, profiling, testing, and packaging.
 
-This book grew out of a personal cheat sheet. Every section leads with the
-*why*, then shows the *how* with runnable snippets, and calls out the gotchas
-that bite people in practice. It targets **Python 3.8+**, and notes version
-specifics where they matter.
+This book grew out of a personal cheat sheet. Every section leads with the *why*, then shows the *how* with runnable snippets, and calls out the gotchas that bite people in practice. It targets **Python 3.8+**, and notes version specifics where they matter.
 
-This is based on the python cheat sheet that I have been honing since many years and still refer to it daily. I then used Claude to convert it to more readable prose, that is hopefully more enjoyable to read. If you prefer the raw/dense cheat sheet
- you can find it [here](python.txt).
+This is based on the python cheat sheet that I have been honing since many years and still refer to it daily. I then used Claude to convert it to more readable prose, that is hopefully more enjoyable to read. If you prefer the raw/dense cheat sheet you can find it [here](python.txt).
 
 ## Table of Contents
 
@@ -61,24 +54,10 @@ The content of this site is distributed under [Attribution-ShareAlike 4.0 Intern
 
 ## My repositories map
 
-✔ **Books:**
- [Machine Learning Engineering](https://github.com/stas00/ml-engineering) |
- [The Art of Debugging](https://github.com/stas00/the-art-of-debugging) |
- [Stas' Python Cookbook](https://github.com/stas00/python-cookbook)
+✔ **Books:** [Machine Learning Engineering](https://github.com/stas00/ml-engineering) | [The Art of Debugging](https://github.com/stas00/the-art-of-debugging) | [Stas' Python Cookbook](https://github.com/stas00/python-cookbook)
 
-✔ **Applications:**
- [ipyexperiments](https://github.com/stas00/ipyexperiments)
+✔ **Applications:** [ipyexperiments](https://github.com/stas00/ipyexperiments)
 
-✔ **Tools and Cheatsheets:**
- [bash](https://github.com/stas00/bash-tools) |
- [conda](https://github.com/stas00/conda-tools) |
- [git](https://github.com/stas00/git-tools) |
- [jupyter-notebook](https://github.com/stas00/jupyter-notebook-tools) |
- [make](https://github.com/stas00/make-tools) |
- [python](https://github.com/stas00/python-tools) |
- [tensorboard](https://github.com/stas00/tensorboard-tools) |
- [unix](https://github.com/stas00/unix-tools)
+✔ **Tools and Cheatsheets:** [bash](https://github.com/stas00/bash-tools) | [conda](https://github.com/stas00/conda-tools) | [git](https://github.com/stas00/git-tools) | [jupyter-notebook](https://github.com/stas00/jupyter-notebook-tools) | [make](https://github.com/stas00/make-tools) | [python](https://github.com/stas00/python-tools) | [tensorboard](https://github.com/stas00/tensorboard-tools) | [unix](https://github.com/stas00/unix-tools)
 
-✔ **Other Machine Learning:**
- [ML ways](https://github.com/stas00/ml-ways) |
- [Porting](https://github.com/stas00/porting)
+✔ **Other Machine Learning:** [ML ways](https://github.com/stas00/ml-ways) | [Porting](https://github.com/stas00/porting)
