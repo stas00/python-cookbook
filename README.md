@@ -26,7 +26,11 @@ I announce any significant updates on my twitter channel [https://twitter.com/St
 
 ## Ebook versions of the book
 
-You can build various ebook formats of this book yourself — the instructions for building are [here](build). Pre-built PDF/EPUB downloads are coming soon.
+You can download various ebook formats of this book:
+* [PDF](https://huggingface.co/stas/python-cookbook/resolve/main/Stas%20Bekman%20-%20Stas%27%20Python%20Cookbook.pdf?download=true)
+* [EPUB](https://huggingface.co/stas/python-cookbook/resolve/main/Stas%20Bekman%20-%20Stas%27%20Python%20Cookbook.epub?download=true)
+
+I will try to rebuild these once in a few weeks or so, but if you want the latest ebook versions, the instructions for building are [here](build).
 
 
 ## SKILL.md for AI agents
