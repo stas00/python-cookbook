@@ -40,9 +40,9 @@ epub: html ## make epub version (from html files)
 		$$(cat chapters-html.txt | tr "\n" " ")
 
 upload: pdf epub ## upload pdf to the hub
-	cp "Stas Bekman - Stas' Python Cookbook.pdf" python-cookbook-book/
-	cp "Stas Bekman - Stas' Python Cookbook.epub" python-cookbook-book/
-	cd python-cookbook-book/ && git commit -m "new version" "Stas Bekman - Stas' Python Cookbook.pdf" "Stas Bekman - Stas' Python Cookbook.epub" && git push
+	cp "Stas Bekman - Stas' Python Cookbook.pdf" python-cookbook/
+	cp "Stas Bekman - Stas' Python Cookbook.epub" python-cookbook/
+	cd python-cookbook/ && git commit -m "new version" "Stas Bekman - Stas' Python Cookbook.pdf" "Stas Bekman - Stas' Python Cookbook.epub" && git push
 
 check-links-local: html-local ## check local links
 	linkchecker --config build/linkcheckerrc $$(cat chapters-html.txt | tr "\n" " ") | tee linkchecker-local.txt
